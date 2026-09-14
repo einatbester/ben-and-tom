@@ -1,0 +1,273 @@
+<title>Ben &amp; Tom Runbook</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:#F2F4F6; --surface:#FFFFFF; --surface-alt:#E9EDF1; --ink:#141E29; --ink-muted:#586574; --border:#DBE1E7;
+    --accent:#9C7522; --accent-soft:#F3E9D2;
+    --good:#2E7D5B; --good-soft:#DFEEE6;
+    --pending:#B45309; --pending-soft:#F7E7D3;
+    --retired:#8B3A3A; --retired-soft:#F3DEDE;
+    --shadow: 0 1px 2px rgba(20,30,41,0.06), 0 8px 24px -12px rgba(20,30,41,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1620; --surface:#16212F; --surface-alt:#1C293A; --ink:#E8ECF1; --ink-muted:#93A3B4;
+      --border:#2B3A4C; --accent:#D8AC52; --accent-soft:#3A2F16; --good:#5FBF93; --good-soft:#173327;
+      --pending:#E3954A; --pending-soft:#3A2A14; --retired:#D98080; --retired-soft:#3A1F1F;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1620; --surface:#16212F; --surface-alt:#1C293A; --ink:#E8ECF1; --ink-muted:#93A3B4;
+    --border:#2B3A4C; --accent:#D8AC52; --accent-soft:#3A2F16; --good:#5FBF93; --good-soft:#173327;
+    --pending:#E3954A; --pending-soft:#3A2A14; --retired:#D98080; --retired-soft:#3A1F1F;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans', system-ui, sans-serif; font-size:16px; line-height:1.6; padding-inline:24px; padding-block:56px; }
+  .page{ max-width:760px; margin-inline:auto; display:flex; flex-direction:column; gap:32px; }
+  h1,h2,h3{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; margin:0; }
+  .eyebrow{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); font-weight:500; }
+  code, .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:0.92em; }
+  a{ color:var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  header{ display:flex; flex-direction:column; gap:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+  header h1{ font-size:clamp(28px,5vw,38px); font-weight:600; }
+  header p{ margin:0; color:var(--ink-muted); max-width:60ch; font-size:15.5px; }
+  .updated{ color:var(--ink-muted); font-size:13px; margin-top:6px; }
+
+  /* Tabs */
+  .tabs{ display:flex; gap:6px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .tab{
+    font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; font-weight:600; color:var(--ink-muted);
+    background:none; border:none; padding:10px 4px 12px; cursor:pointer; white-space:nowrap;
+    border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .15s ease, border-color .15s ease;
+  }
+  .tab:hover{ color:var(--ink); }
+  .tab[aria-selected="true"]{ color:var(--accent); border-bottom-color:var(--accent); }
+  .tabs{ gap:22px; }
+  .tabpanel{ display:flex; flex-direction:column; gap:44px; }
+  .tabpanel[hidden]{ display:none; }
+  @media (prefers-reduced-motion: reduce){ .tab{ transition:none; } }
+
+  .table-wrap{ overflow-x:auto; border:1px solid var(--border); border-radius:10px; background:var(--surface); box-shadow:var(--shadow); }
+  table{ border-collapse:collapse; width:100%; min-width:560px; }
+  th{ text-align:left; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-muted); font-weight:500; padding:12px 16px; border-bottom:1px solid var(--border); background:var(--surface-alt); }
+  td{ padding:13px 16px; border-bottom:1px solid var(--border); vertical-align:top; font-size:14.5px; }
+  tr:last-child td{ border-bottom:none; }
+  td .acct{ color:var(--ink-muted); font-size:13px; }
+
+  .pill{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:100px; font-size:11.5px; font-weight:600; letter-spacing:0.02em; white-space:nowrap; }
+  .pill.live{ background:var(--good-soft); color:var(--good); }
+  .pill.pending{ background:var(--pending-soft); color:var(--pending); }
+  .pill.retired{ background:var(--retired-soft); color:var(--retired); }
+  .pill::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  section{ display:flex; flex-direction:column; gap:16px; }
+  .section-head{ display:flex; flex-direction:column; gap:4px; }
+  .section-head h2{ font-size:22px; font-weight:600; }
+
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:16px; }
+  .spec{ display:grid; grid-template-columns:140px 1fr; gap:10px 16px; font-size:14.5px; }
+  .spec dt{ color:var(--ink-muted); font-size:12.5px; text-transform:uppercase; letter-spacing:0.06em; padding-top:2px; }
+  .spec dd{ margin:0; }
+  .card p.note{ margin:0; padding-top:4px; border-top:1px solid var(--border); color:var(--ink-muted); font-size:14px; }
+  .card p.note strong{ color:var(--ink); }
+
+  .gotcha-list{ display:flex; flex-direction:column; gap:14px; }
+  .gotcha{ background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:14px 18px; box-shadow:var(--shadow); }
+  .gotcha p{ margin:0; font-size:14.5px; }
+
+  .checklist{ display:flex; flex-direction:column; gap:0; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
+  .checklist li{ list-style:none; display:flex; gap:12px; align-items:flex-start; padding:14px 20px; border-bottom:1px solid var(--border); font-size:14.5px; }
+  .checklist li:last-child{ border-bottom:none; }
+  .checklist .box{ width:16px; height:16px; border:1.5px solid var(--ink-muted); border-radius:4px; flex:none; margin-top:2px; }
+
+  .warn-callout{ display:flex; gap:12px; background:var(--pending-soft); border:1px solid color-mix(in srgb, var(--pending) 35%, var(--border)); border-radius:10px; padding:16px 18px; font-size:14.5px; }
+  .warn-callout .mark{ font-family:'Fraunces',serif; font-weight:700; color:var(--pending); font-size:20px; line-height:1; }
+
+  footer{ color:var(--ink-muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+
+  @media (max-width:520px){ .spec{ grid-template-columns:1fr; gap:2px 0; } .spec dt{ padding-top:8px; } }
+</style>
+
+<div class="page">
+
+  <header>
+    <span class="eyebrow">Practice Project</span>
+    <h1>Ben &amp; Tom Runbook</h1>
+    <p>A deliberately small static site used to learn the full domain/DNS/hosting pipeline hands-on, before doing it for real on frooteria.de. Read this before touching the domain or is-a.dev PR again.</p>
+    <div class="updated mono">Last updated 2026-09-14 — after registering besterbros.is-a.dev and writing up the DNS/domain learning notes</div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-goal" aria-selected="true" aria-controls="panel-goal">Goal &amp; Usage</button>
+    <button class="tab" role="tab" id="tab-arch" aria-selected="false" aria-controls="panel-arch">Architecture &amp; Decisions</button>
+    <button class="tab" role="tab" id="tab-future" aria-selected="false" aria-controls="panel-future">Field Notes</button>
+  </div>
+
+  <!-- TAB 1: GOAL & USAGE -->
+  <div class="tabpanel" id="panel-goal" role="tabpanel" aria-labelledby="tab-goal">
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Why this exists</span><h2>The goal</h2></div>
+      <div class="card">
+        <p style="margin:0;">This is not a real product — it's a sandbox for learning how to manually control a live website end to end: push code, host it publicly, attach a real (free) custom domain, and later update the live site with confidence. The real motivation is a separate, real project: <strong>frooteria-local-shine</strong>, a redesign built for Frooteria Juices &amp; Bagels (Munich), currently live at <code>frooteria.de</code>. Before ever touching that real, live domain, this project is where the mistakes get made safely.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Operating it</span><h2>How to run it</h2></div>
+      <div class="card">
+        <dl class="spec">
+          <dt>Run locally</dt><dd><code>npx http-server ./</code> from the project root — serves on <code>http://127.0.0.1:8081</code></dd>
+          <dt>Ship a change</dt><dd><code>git add</code> the edited files, commit, <code>git push</code> to <code>main</code> — GitHub Pages rebuilds automatically within about a minute</dd>
+        </dl>
+        <p class="note">The site is plain <code>index.html</code> + <code>style.css</code> — no build step, no framework, no dependencies. That's intentional: the point of this project is the deployment/domain mechanics, not the site itself.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">What you get</span><h2>Output</h2></div>
+      <div class="card">
+        <p style="margin:0;">A live, public website at <a href="https://einatbester.github.io/ben-and-tom/">https://einatbester.github.io/ben-and-tom/</a> (confirmed working, HTTP 200). Once the is-a.dev pull request below is merged and the custom domain is attached, the same site will also answer at <code>https://besterbros.is-a.dev</code>.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- TAB 2: ARCHITECTURE & DECISIONS -->
+  <div class="tabpanel" id="panel-arch" role="tabpanel" aria-labelledby="tab-arch" hidden>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">At a glance</span><h2>Who does what</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vendor</th><th>Role</th><th>Account</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>GitHub</strong></td><td>Code repository + hosting (GitHub Pages, public repo required on the free tier)</td><td class="mono acct">einatbester</td><td><span class="pill live">Live</span></td></tr>
+            <tr><td><strong>is-a.dev</strong></td><td>Free subdomain registration (<code>besterbros.is-a.dev</code>) via a PR-reviewed community registry</td><td class="mono acct">einat.bester@gmail.com</td><td><span class="pill pending">Pending merge</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Running costs</span><h2>What this costs to keep alive</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vendor</th><th>Cost</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>GitHub Pages</strong></td><td>Free</td><td>Requires the repo to stay public — a private repo has no working Pages link at all on the free tier</td></tr>
+            <tr><td><strong>is-a.dev</strong></td><td>Free</td><td>No self-service dashboard — every change to the domain record goes through a GitHub pull request reviewed by a volunteer maintainer</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color:var(--ink-muted); font-size:14px; margin:0;">Bottom line: this entire project costs $0, indefinitely.</p>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Under the hood</span><h2>How it works</h2></div>
+      <div class="card">
+        <dl class="spec">
+          <dt>Hosting</dt><dd>GitHub Pages, source set to the <code>main</code> branch, root folder. Serves <code>index.html</code>/<code>style.css</code> directly, no build step.</dd>
+          <dt>DNS layer</dt><dd>A <code>besterbros.json</code> file submitted to <code>is-a-dev/register</code> declares a CNAME record: <code>besterbros.is-a.dev</code> → <code>einatbester.github.io</code>.</dd>
+          <dt>Platform layer</dt><dd>Once the PR merges, <code>ben-and-tom</code>'s repo Settings → Pages → Custom domain must also be set to <code>besterbros.is-a.dev</code>. This writes a <code>CNAME</code> file into the repo and is what actually claims the domain for this specific repo (not any other repo on the same account).</dd>
+        </dl>
+        <p class="note"><strong>Why it matters:</strong> the DNS record alone is not enough — until the Platform layer step is done too, <code>besterbros.is-a.dev</code> will resolve to GitHub's servers but show is-a.dev's generic "not registered" page, not this site.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Why we chose this</span><h2>Key decisions</h2></div>
+      <div class="card">
+        <dl class="spec">
+          <dt>is-a.dev vs Netlify/Vercel</dt><dd>Chose to do this manually with GitHub Pages + is-a.dev instead of Netlify/Vercel specifically <em>because</em> those platforms automate away the DNS/custom-domain steps — the whole point of this project is to feel every step of that process by hand, since the same steps (minus the free-domain part) are what a real switch on <code>frooteria.de</code> will require.</dd>
+          <dt>is-a.dev vs a real paid domain</dt><dd>Chose is-a.dev because it's free and it does exercise the real mechanic — a domain pointing somewhere via a DNS record that you change and wait to propagate. <strong>Good practice, but not a perfect analogy</strong>: is-a.dev's registration flow is a slow, human-reviewed GitHub pull request, while the real <code>frooteria.de</code> switch will happen instantly and self-service inside a registrar's DNS dashboard (see below) — nobody has to approve it. More importantly, is-a.dev subdomains carry no email, so this practice never surfaces the single biggest real risk of a domain switch: silently breaking a business's email by repointing DNS carelessly. That risk is real for <code>frooteria.de</code> and invisible here.</dd>
+          <dt>frooteria-local-shine kept private</dt><dd>The real estate redesign repo is a private GitHub repo on purpose, so the prototype isn't publicly visible under the real business's name before it's ready to show the client — normal, legitimate practice, not an issue, as long as it's never presented publicly as their live site without consent.</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Real-world context</span><h2>How frooteria.de works today</h2></div>
+      <div class="card">
+        <dl class="spec">
+          <dt>Registrar / DNS</dt><dd><strong>GoDaddy</strong> (<code>ns81.domaincontrol.com</code>, <code>ns82.domaincontrol.com</code>) — both the domain registration and its DNS records live here, self-service via GoDaddy's dashboard</dd>
+          <dt>Hosting</dt><dd><code>81.169.202.53</code> — a German shared-hosting IP range (<strong>Strato</strong>), not GitHub Pages or any platform used in this practice project</dd>
+          <dt>Email</dt><dd>The <code>MX</code> record points at <code>www.frooteria.de</code> itself — their email is very likely running on the <strong>same server</strong> as their current website</dd>
+        </dl>
+        <p class="note"><strong>Why it matters:</strong> because email and the website share infrastructure here, the real cutover cannot just be "point the domain at the new host" — it has to specifically avoid touching nameservers or the MX record, or their email goes down silently along with the old site. See the switch-safety checklist in Field Notes — that work hasn't started yet.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- TAB 3: FIELD NOTES -->
+  <div class="tabpanel" id="panel-future" role="tabpanel" aria-labelledby="tab-future" hidden>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Field notes</span><h2>Only matters again if…</h2></div>
+      <p style="color:var(--ink-muted); font-size:14.5px; margin:0;">Everything below is already handled — nothing here needs action right now.</p>
+      <div class="gotcha-list">
+        <div class="gotcha"><p><strong>…the is-a.dev pull request (#52219 on <code>is-a-dev/register</code>) still shows as open/pending next time you look.</strong> That's expected — it's a volunteer-reviewed queue with no fixed turnaround. Check its status before doing anything else with the domain; don't resubmit unless it was explicitly closed/denied again.</p></div>
+        <div class="gotcha"><p><strong>…the PR gets denied again for an incomplete template.</strong> The template uses hidden HTML comment markers (e.g. <code>&lt;!-- WEBSITE_PREVIEW_START --&gt;</code>) that GitHub's rendered editor can silently mangle. Always edit on the "Write" tab and paste the full template back in, rather than typing inside the rendered preview.</p></div>
+        <div class="gotcha"><p><strong>…you ever need to demo <code>frooteria-local-shine</code> publicly before it's finished.</strong> Its repo is private on purpose, so it has no live Pages link at all right now. Either flip it public temporarily for the demo, or share via a local tunnel — don't leave it public by default.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Before the real cutover</span><h2>Frooteria.de switch-safety checklist</h2></div>
+      <p style="color:var(--ink-muted); font-size:14.5px; margin:0;">The real switch hasn't happened yet — none of this is done. Work through this before ever touching frooteria.de's live DNS.</p>
+      <ul class="checklist">
+        <li><span class="box"></span>Confirm exactly which record(s) currently make email work (<code>MX</code> → <code>www.frooteria.de</code> → <code>81.169.202.53</code>), and write the switch plan so it explicitly leaves them untouched</li>
+        <li><span class="box"></span>Fully build and test the new site on its new host's free subdomain first — never point the real domain at something unverified</li>
+        <li><span class="box"></span>A day or two before the real cutover, lower frooteria.de's DNS TTL in the GoDaddy dashboard, so the real change propagates fast when it counts</li>
+        <li><span class="box"></span>On switch day, change only the specific record(s) needed to point the domain at the new host (the <code>A</code> or <code>CNAME</code> for the site) — do not touch nameservers, and do not touch the <code>MX</code> record</li>
+        <li><span class="box"></span>Immediately after the change, verify both the new website <em>and</em> that email is still arriving</li>
+        <li><span class="box"></span>Keep the old Strato hosting/account active for a rollback window in case anything breaks</li>
+      </ul>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">If there's time later</span><h2>Ways to expand this</h2></div>
+      <div class="card">
+        <ul style="margin:0; padding-left:20px; font-size:14.5px; display:flex; flex-direction:column; gap:8px;">
+          <li>Once <code>besterbros.is-a.dev</code> is live, deliberately practice updating the site — edit, commit, push, and watch the live custom domain change — that's the actual skill this whole project exists to build.</li>
+          <li>Apply the exact same manual-switch muscle memory, plus the safety checklist above, to the real <code>frooteria.de</code> cutover when the new site is ready.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><span class="eyebrow">Next time</span><h2>Reactivation checklist</h2></div>
+      <ul class="checklist">
+        <li><span class="box"></span>Check PR #52219 status at <code>github.com/is-a-dev/register/pulls</code></li>
+        <li><span class="box"></span>If merged: in <code>ben-and-tom</code> → Settings → Pages → Custom domain, enter <code>besterbros.is-a.dev</code> and save</li>
+        <li><span class="box"></span>Confirm a <code>CNAME</code> file containing <code>besterbros.is-a.dev</code> now exists in the repo, and GitHub's DNS check passes</li>
+        <li><span class="box"></span>Visit <code>https://besterbros.is-a.dev</code> to confirm it serves this site (allow up to 24h for propagation)</li>
+        <li><span class="box"></span>Re-read <code>learning-notes-domains-dns.md</code> in this repo for the full DNS/domain background before doing anything with frooteria.de</li>
+      </ul>
+    </section>
+
+  </div>
+
+  <footer>ben-and-tom — a practice project for learning to manually control a live domain, built ahead of switching frooteria.de to its new website.</footer>
+
+</div>
+<script>
+  (function(){
+    var tabs = document.querySelectorAll('.tab');
+    var panels = { 'tab-goal':'panel-goal', 'tab-arch':'panel-arch', 'tab-future':'panel-future' };
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        tabs.forEach(function(t){ t.setAttribute('aria-selected', t === tab ? 'true' : 'false'); });
+        Object.values(panels).forEach(function(id){ document.getElementById(id).hidden = true; });
+        document.getElementById(panels[tab.id]).hidden = false;
+      });
+    });
+  })();
+</script>

@@ -149,10 +149,11 @@
           <thead><tr><th>Vendor</th><th>Role</th><th>Account</th><th>Status</th></tr></thead>
           <tbody>
             <tr><td><strong>GitHub</strong></td><td>Code repository + hosting (GitHub Pages, public repo required on the free tier)</td><td class="mono acct">einatbester</td><td><span class="pill live">Live</span></td></tr>
-            <tr><td><strong>is-a.dev</strong></td><td>Free subdomain registration (<code>besterbros.is-a.dev</code>) via a PR-reviewed community registry</td><td class="mono acct">einat.bester@gmail.com</td><td><span class="pill pending">Pending merge</span></td></tr>
+            <tr><td><strong>is-a.dev</strong></td><td>Free subdomain registration (<code>besterbros.is-a.dev</code>) via a pull request (PR)-reviewed community registry</td><td class="mono acct">einat.bester@gmail.com</td><td><span class="pill pending">Pending merge</span></td></tr>
           </tbody>
         </table>
       </div>
+      <div class="warn-callout"><span class="mark">!</span><p style="margin:0;">This repo's GitHub account is <strong>einatbester</strong>. This machine's Git Credential Manager has also been logged into at least one other GitHub account (<code>nivbester</code>) — a push here can silently fail with a 403 "permission denied" error if the cached login is the wrong account. See Field Notes if that happens again.</p></div>
     </section>
 
     <section>
@@ -213,7 +214,8 @@
       <div class="section-head"><span class="eyebrow">Field notes</span><h2>Only matters again if…</h2></div>
       <p style="color:var(--ink-muted); font-size:14.5px; margin:0;">Everything below is already handled — nothing here needs action right now.</p>
       <div class="gotcha-list">
-        <div class="gotcha"><p><strong>…the is-a.dev pull request (#52219 on <code>is-a-dev/register</code>) still shows as open/pending next time you look.</strong> That's expected — it's a volunteer-reviewed queue with no fixed turnaround. Check its status before doing anything else with the domain; don't resubmit unless it was explicitly closed/denied again.</p></div>
+        <div class="gotcha"><p><strong>…the is-a.dev PR #52219 on <code>is-a-dev/register</code> still shows as open/pending next time you look.</strong> That's expected — it's a volunteer-reviewed queue with no fixed turnaround. Check its status before doing anything else with the domain; don't resubmit unless it was explicitly closed/denied again.</p></div>
+        <div class="gotcha"><p><strong>…<code>git push</code> fails with a 403 "Permission denied to &lt;some other username&gt;" error.</strong> This repo belongs to GitHub account <strong>einatbester</strong>, but this machine's Git Credential Manager can end up logged in as a different account (it happened with <code>nivbester</code>). Fix: run <code>git credential-manager github logout &lt;wrong-account&gt;</code>, then push again to trigger a fresh login as <code>einatbester</code>.</p></div>
         <div class="gotcha"><p><strong>…the PR gets denied again for an incomplete template.</strong> The template uses hidden HTML comment markers (e.g. <code>&lt;!-- WEBSITE_PREVIEW_START --&gt;</code>) that GitHub's rendered editor can silently mangle. Always edit on the "Write" tab and paste the full template back in, rather than typing inside the rendered preview.</p></div>
         <div class="gotcha"><p><strong>…you ever need to demo <code>frooteria-local-shine</code> publicly before it's finished.</strong> Its repo is private on purpose, so it has no live Pages link at all right now. Either flip it public temporarily for the demo, or share via a local tunnel — don't leave it public by default.</p></div>
       </div>
